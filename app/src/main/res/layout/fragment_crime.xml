@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:padding="10dp"
             android:text="@string/crime_title_label"
-            android:textSize="20dp"/>
+            android:textSize="16dp"/>
 
         <EditText
             android:id="@+id/crime_title"
@@ -37,7 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="@string/crime_detial_label"
-            android:textSize="20dp"
+            android:textSize="16dp"
             android:padding="10dp"/>
         <Button
             android:id="@+id/crime_data"

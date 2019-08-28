@@ -46,7 +46,7 @@ public class CrimeFragment extends Fragment {
 
             @Override
             /**
-             * CharSequence代笔用户输入
+             * CharSequence代表用户输入
              */
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 mCrime.setTitle(charSequence.toString());
