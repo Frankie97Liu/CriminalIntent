@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +47,7 @@ public class CrimeListFragment extends Fragment {
         //绑定列表项
         private TextView mTitleTextView;
         private TextView mDataTextView;
+        private ImageView mSolvedImageView;
 
         private Crime mCrime;
 
@@ -55,12 +57,15 @@ public class CrimeListFragment extends Fragment {
 
             mTitleTextView = itemView.findViewById(R.id.crime_title);
             mDataTextView = itemView.findViewById(R.id.crime_data);
+            mSolvedImageView = itemView.findViewById(R.id.crime_solved);
+
         }
 
         public void bind(Crime crime){
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
-            mDataTextView.setText(mCrime.getTitleData().toString());
+            mDataTextView.setText(mCrime.getTitleData());
+            mSolvedImageView.setVisibility(crime.isSolved()? View.VISIBLE:View.GONE);
         }
 
         @Override
