@@ -75,11 +75,10 @@ public class CrimeListFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            //启动CrimeActivity活动,传递extra
-            Intent intent = new Intent(getActivity(),CrimeActivity.class);
+            //启动CrimePagerActivity活动,传递extra
+            Intent intent = new Intent(getActivity(),CrimePagerActivity.class);
             intent.putExtra("crime_id",mCrime.getTitleId());
             startActivity(intent);
-            //startActivityForResult(intent,1);
         }
     }
 
