@@ -16,7 +16,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class CrimeListFragment extends Fragment {
 
@@ -69,7 +72,7 @@ public class CrimeListFragment extends Fragment {
         public void bind(Crime crime){
             mCrime = crime;
             mTitleTextView.setText(mCrime.getTitle());
-            mDataTextView.setText(mCrime.getTitleData());
+            mDataTextView.setText(formateDate(mCrime.getTitleData()));
             mSolvedImageView.setVisibility(crime.isSolved()? View.VISIBLE:View.GONE);
         }
 
@@ -127,5 +130,11 @@ public class CrimeListFragment extends Fragment {
         }else {
             mAdapter.notifyDataSetChanged();
         }
+    }
+
+    //格式化日期
+    private String formateDate(Date date){
+        SimpleDateFormat df = new SimpleDateFormat("EEEE MM/dd/yyyy", Locale.CHINA);
+        return df.format(date);
     }
 }

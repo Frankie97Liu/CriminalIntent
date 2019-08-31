@@ -37,10 +37,8 @@ public class Crime {
         this.title = title;
     }
 
-    public String getTitleData() {
-        //格式化日期
-        SimpleDateFormat df = new SimpleDateFormat("EEEE MM/dd/yyyy", Locale.CHINA);
-        return df.format(titleData);
+    public Date getTitleData() {
+        return titleData;
     }
 
     public void setTitleData(Date titleData) {
