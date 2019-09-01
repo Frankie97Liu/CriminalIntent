@@ -3,15 +3,21 @@ package com.example.criminalintent;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -30,6 +36,24 @@ public class CrimeListFragment extends Fragment {
 
     private CrimeAdapter mAdapter;
 
+    private boolean mSubtitleVisible; //记录子标签状态
+
+    private TextView nullCrimeList;
+
+    private Button addCrimeButton;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        //接收选项菜单方法回调
+        setHasOptionsMenu(true);
+
+        if (savedInstanceState!=null){
+            mSubtitleVisible = savedInstanceState.getBoolean("subtitle");
+        }
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -45,6 +69,15 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView.setAdapter(mAdapter);
         */
         updateUI();
+
+        nullCrimeList = view.findViewById(R.id.null_crime_list);
+        addCrimeButton = view.findViewById(R.id.add_crime);
+        addCrimeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                addNewCrimePagerAct();
+            }
+        });
 
 
         return view;
@@ -81,6 +114,7 @@ public class CrimeListFragment extends Fragment {
             //启动CrimePagerActivity活动,传递extra
             Intent intent = new Intent(getActivity(),CrimePagerActivity.class);
             intent.putExtra("crime_id",mCrime.getTitleId());
+            Log.d("id", "onClick: "+mCrime.getTitleId());
             startActivity(intent);
         }
     }
@@ -112,7 +146,63 @@ public class CrimeListFragment extends Fragment {
         }
     }
 
+    /**
+     * 创建菜单
+     * @param menu
+     * @param inflater
+     */
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime_list,menu);
 
+        //更新菜单项
+        MenuItem subtitleItem = menu.findItem(R.id.show_subtitle);
+        if (mSubtitleVisible){
+            subtitleItem.setTitle(R.string.hide_subtitle);
+        }else{
+            subtitleItem.setTitle(R.string.show_subtitle);
+        }
+    }
+
+    /**
+     * 响应菜单项选择事件
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.new_crime:
+                addNewCrimePagerAct();
+                return true;
+            case R.id.show_subtitle:
+                mSubtitleVisible = !mSubtitleVisible;
+                //告诉菜单项要更改
+                getActivity().invalidateOptionsMenu();
+
+                updateSubtitle();
+                return true;
+                default:
+                    return super.onOptionsItemSelected(item);
+        }
+    }
+
+    //显示Crime记录条数，设置子标题
+    private void updateSubtitle(){
+        CrimeLab crimeLab = CrimeLab.get(getActivity());
+        int crimeSize = crimeLab.getCrimes().size();
+        //复数字符串资源
+        String subtitle = getResources().getQuantityString(R.plurals.subtitle_plural,crimeSize,crimeSize);
+
+        //实现菜单项标题和子标题联动
+        if (!mSubtitleVisible){
+            subtitle = null;
+        }
+
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setSubtitle(subtitle);
+    }
 
     @Override
     public void onResume() {
@@ -128,13 +218,48 @@ public class CrimeListFragment extends Fragment {
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
         }else {
+            //重绘当前可见区域
             mAdapter.notifyDataSetChanged();
+
+            //重绘部分区域
+            //mAdapter.notifyItemChanged(crimes.indexOf(crimes));
+            if (crimes.size() != 0){
+                nullCrimeList.setVisibility(View.INVISIBLE);
+                addCrimeButton.setVisibility(View.INVISIBLE);
+            }else {
+                nullCrimeList.setVisibility(View.VISIBLE);
+                addCrimeButton.setVisibility(View.VISIBLE);
+            }
+            //更新子标题
+            updateSubtitle();
         }
+    }
+
+    /**
+     * 保存子标题的状态值
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("subtitle",mSubtitleVisible);
     }
 
     //格式化日期
     private String formateDate(Date date){
         SimpleDateFormat df = new SimpleDateFormat("EEEE MM/dd/yyyy", Locale.CHINA);
         return df.format(date);
+    }
+
+    /**
+     * 创建新的CrimePagerActivity
+     */
+    private void addNewCrimePagerAct(){
+        Crime crime = new Crime();
+        CrimeLab.get(getActivity()).addCrime(crime);
+
+        Intent intent = new Intent(getActivity(),CrimePagerActivity.class);
+        intent.putExtra("crime_id",crime.getTitleId());
+        startActivity(intent);
     }
 }

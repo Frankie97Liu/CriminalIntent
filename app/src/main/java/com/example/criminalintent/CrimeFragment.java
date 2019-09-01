@@ -7,6 +7,9 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -58,6 +61,9 @@ public class CrimeFragment extends Fragment {
         //从Argument获取crimeId
         UUID crimeId = (UUID)getArguments().getSerializable(ARG_CRIME_ID);
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+
+        //显示菜单项
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -120,6 +126,31 @@ public class CrimeFragment extends Fragment {
     }
 
     @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.fragment_crime,menu);
+    }
+
+    /**
+     * 选择菜单项响应事件
+     * @param item
+     * @return
+     */
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+       switch (item.getItemId()){
+           case R.id.delete:
+               //删除Crime
+               CrimeLab.get(getActivity()).deleteCrime(mCrime);
+               getActivity().finish();
+               return true;
+               default:
+                   return super.onOptionsItemSelected(item);
+       }
+
+    }
+
+    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode){
             case 0:
@@ -131,6 +162,9 @@ public class CrimeFragment extends Fragment {
         }
     }
 
+    /**
+     * 格式化日期
+     */
     private void updateDate() {
         mDataButton.setText(formateDate(mCrime.getTitleData()));
     }

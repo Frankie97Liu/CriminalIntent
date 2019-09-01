@@ -22,6 +22,7 @@ public class CrimeLab {
     private CrimeLab(Context context){
         mCrimes = new ArrayList<>();
 
+        /*
         //生成100个crime数据
         for (int i=0;i<100;i++){
             Crime crime = new Crime();
@@ -29,6 +30,7 @@ public class CrimeLab {
             crime.setSolved(i % 2 ==0);
             mCrimes.add(crime);
         }
+         */
 
     }
 
@@ -46,4 +48,12 @@ public class CrimeLab {
         }
         return null;
     }
+
+    //添加新的crime
+    public void addCrime(Crime c){
+        mCrimes.add(c);
+    }
+
+    //删除crime
+    public void deleteCrime(Crime c){mCrimes.remove(c);}
 }
