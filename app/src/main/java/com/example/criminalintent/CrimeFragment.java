@@ -53,10 +53,6 @@ public class CrimeFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //mCrime = new Crime();
-
-        //直接调用Activity中的extra
-        //UUID crimeId = (UUID)getActivity().getIntent().getSerializableExtra(CrimeActivity.EXTRA_CRIME_ID);
 
         //从Argument获取crimeId
         UUID crimeId = (UUID)getArguments().getSerializable(ARG_CRIME_ID);
@@ -160,6 +156,13 @@ public class CrimeFragment extends Fragment {
                     updateDate();
                 }
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        CrimeLab.get(getActivity()).updateCrime(mCrime);
     }
 
     /**

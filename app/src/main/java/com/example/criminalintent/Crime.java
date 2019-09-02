@@ -21,7 +21,11 @@ public class Crime {
 
     public Crime(){
         //产生一个随机唯一ID值
-        mTitleId = UUID.randomUUID();
+        this(UUID.randomUUID());
+    }
+
+    public Crime(UUID id){
+        mTitleId = id;
         titleData = new Date();
     }
 
