@@ -2,7 +2,6 @@ package com.example.criminalintent;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Locale;
 import java.util.UUID;
 
 public class Crime {
@@ -17,6 +16,12 @@ public class Crime {
 
     //陋习是否被解决
     private boolean isSolved;
+
+    //添加嫌疑人信息
+    private String mSuspect;
+
+    //添加嫌疑人号码
+    private String mSuspectPhone;
 
 
     public Crime(){
@@ -55,5 +60,21 @@ public class Crime {
 
     public void setSolved(boolean solved) {
         isSolved = solved;
+    }
+
+    public String getSuspect() {
+        return mSuspect;
+    }
+
+    public void setSuspect(String suspect) {
+        mSuspect = suspect;
+    }
+
+    public String getSuspectPhone() {
+        return mSuspectPhone;
+    }
+
+    public void setSuspectPhone(String suspectPhone) {
+        mSuspectPhone = suspectPhone;
     }
 }

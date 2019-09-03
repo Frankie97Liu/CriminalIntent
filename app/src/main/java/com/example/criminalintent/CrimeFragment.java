@@ -3,9 +3,15 @@ package com.example.criminalintent;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Contacts;
+import android.provider.ContactsContract;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -16,9 +22,12 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ShareCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -27,11 +36,14 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.UUID;
 
+import database.CrimeDbSchema;
+
 public class CrimeFragment extends Fragment {
 
     private static final String ARG_CRIME_ID = "crime_id";
 
     private static final int REQUEST_DATE = 0;
+    private static final int REQUEST_CONTACT = 1;
 
     //模型向控制器传递参数
     private Crime mCrime;
@@ -39,6 +51,13 @@ public class CrimeFragment extends Fragment {
     private EditText mTitleField;
     private Button mDataButton;
     private CheckBox mSolvedCheckBox;
+
+    private Button mReportButton;
+    private Button mSuspectButton;
+    private Button mCallButton;
+
+    private ImageButton mPhotoButton;
+    private ImageView mPhotoView;
 
     //编写newInstance(UUID)方法，从CrimePagerActivity获取crimeId
     public static CrimeFragment newInstance(UUID crimeId){
@@ -108,6 +127,61 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mReportButton = v.findViewById(R.id.crime_report);
+        mReportButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //创建隐式Intent用来发送消息
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                //指定发送信息的类型
+                intent.setType("text/plain");
+                //邮件内容
+                intent.putExtra(Intent.EXTRA_TEXT,getCrimeReport());
+                //邮件主题
+                intent.putExtra(Intent.EXTRA_SUBJECT,getString(R.string.crime_report_subject));
+                /*
+
+                //通过ShareCompat创建发送信息
+                Intent intent = ShareCompat.IntentBuilder.from(getActivity())
+                        .setType("text/plain")
+                        .setText(getCrimeReport())
+                        .setSubject(getString(R.string.crime_report_subject))
+                        .getIntent();
+
+                 */
+                //使用选择器
+                // 目的：用户可以自定义选择打开的应用，不会默认
+                intent = Intent.createChooser(intent,getString(R.string.send_report));
+                startActivity(intent);
+            }
+        });
+
+
+        final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
+        mSuspectButton = v.findViewById(R.id.crime_suspect);
+        mSuspectButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(pickContact,REQUEST_CONTACT);
+            }
+        });
+        if (mCrime.getSuspect()!=null){
+            mSuspectButton.setText(mCrime.getSuspect());
+        }
+
+        //检查是否存在联系人应用
+        PackageManager packageManager = getActivity().getPackageManager();
+        //如果没有联系人应用，按钮不可选
+        if (packageManager.resolveActivity(pickContact,PackageManager.MATCH_DEFAULT_ONLY)==null){
+            mSuspectButton.setEnabled(false);
+        }
+
+        mCallButton = v.findViewById(R.id.crime_call);
+        mCallButton.setEnabled(false);
+
+
+
         mSolvedCheckBox = v.findViewById(R.id.crime_solved);
         mSolvedCheckBox.setChecked(mCrime.isSolved());
         //设置监听器
@@ -117,6 +191,9 @@ public class CrimeFragment extends Fragment {
                 mCrime.setSolved(isChecked);
             }
         });
+
+        mPhotoButton = v.findViewById(R.id.crime_camera);
+        mPhotoView = v.findViewById(R.id.crime_photo);
 
         return  v;
     }
@@ -148,13 +225,42 @@ public class CrimeFragment extends Fragment {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        switch (requestCode){
-            case 0:
-                if (resultCode == Activity.RESULT_OK){
-                    Date date = (Date)data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
-                    mCrime.setTitleData(date);
-                    updateDate();
+
+        if (resultCode != Activity.RESULT_OK) {
+            return;
+        }
+
+        if (requestCode == REQUEST_DATE) {
+            Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+            mCrime.setTitleData(date);
+            updateDate();
+        }
+
+        else if (requestCode == REQUEST_CONTACT && data != null) {
+            Uri contactUri = data.getData();
+            String contactId = null;
+
+            //查询语句，返回全部联系人的名字,得到目标联系人的ID
+            String[] queryFields = new String[]{
+                    ContactsContract.Contacts.DISPLAY_NAME,
+                    ContactsContract.Contacts._ID};
+
+            //cursor只包含一条记录
+            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
+            try {
+                if (c.getCount() == 0) {
+                    return;
                 }
+
+                c.moveToFirst();
+                //获取cursor的字符串形式
+                String suspect = c.getString(0);
+                mCrime.setSuspect(suspect);
+                mSuspectButton.setText(suspect);
+
+            } finally {
+                c.close();
+            }
         }
     }
 
@@ -166,10 +272,28 @@ public class CrimeFragment extends Fragment {
     }
 
     /**
-     * 格式化日期
+     * 格式化按钮日期
      */
     private void updateDate() {
         mDataButton.setText(formateDate(mCrime.getTitleData()));
+    }
+
+    //发送内容
+    private String getCrimeReport(){
+        String solvedString = null;
+        if (mCrime.isSolved()){
+            solvedString = getString(R.string.crime_report_solved);
+        }else{
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+
+        String dateFormat = "EEE, MMM dd";
+        String dataString = DateFormat.format(dateFormat,mCrime.getTitleData()).toString();
+
+        String suspect = mCrime.getSuspect();
+
+        String report = getString(R.string.crime_report,mCrime.getTitle(),dataString,solvedString,"The suspect is "+suspect);
+        return report;
     }
 
     //格式化日期

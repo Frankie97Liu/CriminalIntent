@@ -3,35 +3,64 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="10dp">
 
     <LinearLayout
-        android:orientation="vertical"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="10dp">
+        android:layout_marginLeft="16dp"
+        android:layout_marginTop="16dp">
 
-        <TextView
-            style="?android:listSeparatorTextViewStyle"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:text="@string/crime_title_label"
-            android:textSize="16dp"/>
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
-        <EditText
-            android:id="@+id/crime_title"
-            android:layout_width="match_parent"
+            <ImageView
+                android:id="@+id/crime_photo"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:scaleType="centerInside"
+                android:cropToPadding="true"
+                android:background="@android:color/darker_gray"/>
+            <ImageButton
+                android:id="@+id/crime_camera"
+                android:layout_width="80dp"
+                android:layout_height="40dp"
+                android:src="@android:drawable/ic_menu_camera"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:hint="@string/crime_title_hint"
-            android:padding="10dp" />
+            android:layout_weight="1">
+
+            <TextView
+                style="?android:listSeparatorTextViewStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:text="@string/crime_title_label"
+                android:textSize="16dp"/>
+
+            <EditText
+                android:id="@+id/crime_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/crime_title_hint"
+                android:padding="10dp" />
+        </LinearLayout>
     </LinearLayout>
 
+
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="10dp">
+        android:paddingTop="10dp"
+        android:paddingLeft="10dp">
 
         <TextView
             style="?android:listSeparatorTextViewStyle"
@@ -52,5 +81,28 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/crime_sloved_label"
-        android:textSize="16dp"/>
+        android:textSize="16dp"
+        android:layout_marginLeft="10dp"/>
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp">
+        <Button
+            android:id="@+id/crime_suspect"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/crime_suspect_text"/>
+        <Button
+            android:id="@+id/crime_report"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/crime_report_text"/>
+        <Button
+            android:id="@+id/crime_call"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/crime_call"/>
+    </LinearLayout>
 </LinearLayout>
