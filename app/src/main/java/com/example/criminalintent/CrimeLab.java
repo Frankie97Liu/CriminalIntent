@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -121,5 +122,13 @@ public class CrimeLab {
         );
 
         return new CrimeCursorWrapper(cursor);
+    }
+
+    //找到要保存文件的目录
+    public File getPhotoFile(Crime crime){
+        //获取data/data/包名/files目录
+        File fileDir = mContext.getFilesDir();
+        //返回指向某个具体位置的File对象
+        return new File(fileDir,crime.getPhotoFilename());
     }
 }

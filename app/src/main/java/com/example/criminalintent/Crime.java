@@ -77,4 +77,9 @@ public class Crime {
     public void setSuspectPhone(String suspectPhone) {
         mSuspectPhone = suspectPhone;
     }
+
+    //添加照片文件名
+    public String getPhotoFilename(){
+        return "IMG_" + getTitleId().toString() + ".jpg";
+    }
 }

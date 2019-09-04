@@ -2,6 +2,7 @@ package com.example.criminalintent;
 
 
 import android.content.Intent;
+import android.media.browse.MediaBrowser;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -19,10 +21,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -58,6 +62,7 @@ public class CrimeListFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_crime_list,container,false);
+
 
         mCrimeRecyclerView = view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -120,7 +125,7 @@ public class CrimeListFragment extends Fragment {
     }
 
     //创建Adapter
-    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder>{
+    private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> implements OnItemTouchListener {
         private List<Crime>mCrimes;
 
         public CrimeAdapter(List<Crime> crimes){
@@ -145,10 +150,83 @@ public class CrimeListFragment extends Fragment {
             return mCrimes.size();
         }
 
+        @Override
+        public void onMove(int fromPosition, int toPosition) {
+            if (fromPosition < toPosition){
+                for (int i = fromPosition; i< toPosition;i++){
+                    Collections.swap(mCrimes,i,i+1);
+                }
+            }else {
+                for (int i = fromPosition; i>toPosition;i--){
+                    Collections.swap(mCrimes,i,i-1);
+                }
+            }
+            notifyItemMoved(fromPosition, toPosition);
+        }
+
+        @Override
+        public void onSwiped(int position) {
+            mCrimes.remove(position);
+            notifyItemChanged(position);
+
+        }
+
+        @Override
+        public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+            super.onAttachedToRecyclerView(recyclerView);
+            mCrimeRecyclerView = recyclerView;
+        }
+
+        @Override
+        public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView);
+            mCrimeRecyclerView = null;
+        }
+
         public void setCrimes(List<Crime> crimes){
             mCrimes = crimes;
         }
     }
+
+    private class CrimeItemToucch extends ItemTouchHelper.Callback{
+        private OnItemTouchListener mOnItemTouchListener;
+
+        public void setOnItemTouchListener(OnItemTouchListener onItemTouchListener){
+            mOnItemTouchListener = onItemTouchListener;
+        }
+
+        @Override
+        public int getMovementFlags(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            //滑动只支持右滑
+            return makeMovementFlags(ItemTouchHelper.UP|ItemTouchHelper.DOWN,ItemTouchHelper.RIGHT);
+        }
+
+        @Override
+        public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+            int fromPosition = viewHolder.getAdapterPosition();
+            int toPosition = target.getAdapterPosition();
+            mOnItemTouchListener.onMove(fromPosition,toPosition);
+            return true;
+        }
+
+        @Override
+        public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+            int postion = viewHolder.getAdapterPosition();
+            mOnItemTouchListener.onSwiped(postion);
+        }
+
+        @Override
+        public void onSelectedChanged(@Nullable RecyclerView.ViewHolder viewHolder, int actionState) {
+            super.onSelectedChanged(viewHolder, actionState);
+        }
+
+        @Override
+        public void clearView(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder) {
+            super.clearView(recyclerView, viewHolder);
+        }
+    }
+
+
 
     /**
      * 创建菜单
@@ -222,6 +300,12 @@ public class CrimeListFragment extends Fragment {
             mAdapter = new CrimeAdapter(crimes);
             mCrimeRecyclerView.setAdapter(mAdapter);
         }else {
+
+            CrimeItemToucch toucch = new CrimeItemToucch();
+            toucch.setOnItemTouchListener(mAdapter);
+            ItemTouchHelper itemTouchHelper = new ItemTouchHelper(toucch);
+            itemTouchHelper.attachToRecyclerView(mCrimeRecyclerView);
+            
             mAdapter.setCrimes(crimes);
             //重绘当前可见区域
             mAdapter.notifyDataSetChanged();
