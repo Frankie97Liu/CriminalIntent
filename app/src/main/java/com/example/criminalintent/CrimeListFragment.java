@@ -305,7 +305,7 @@ public class CrimeListFragment extends Fragment {
             toucch.setOnItemTouchListener(mAdapter);
             ItemTouchHelper itemTouchHelper = new ItemTouchHelper(toucch);
             itemTouchHelper.attachToRecyclerView(mCrimeRecyclerView);
-            
+
             mAdapter.setCrimes(crimes);
             //重绘当前可见区域
             mAdapter.notifyDataSetChanged();

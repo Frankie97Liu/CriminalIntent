@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Contacts;
 import android.provider.ContactsContract;
+import android.provider.FontRequest;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -366,11 +367,12 @@ public class CrimeFragment extends Fragment {
         }
 
         String dateFormat = "EEE, MMM dd";
-        String dataString = DateFormat.format(dateFormat,mCrime.getTitleData()).toString();
+        String dataString = formateDate(mCrime.getTitleData());
+
 
         String suspect = mCrime.getSuspect();
 
-        String report = getString(R.string.crime_report,mCrime.getTitle(),dataString,solvedString,"The suspect is "+suspect);
+        String report = getString(R.string.crime_report,mCrime.getTitle(),dataString,solvedString," 嫌疑人是 "+suspect);
         return report;
     }
 
